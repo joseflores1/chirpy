@@ -18,15 +18,14 @@ func main() {
 
 	// Define apiConfig struct
 	apiCfg := &apiConfig{
-		fileServerHits: atomic.Int32{
-		},
+		fileServerHits: atomic.Int32{},
 	}
 
 	// Define mux
 	serveMux := http.NewServeMux()
 	// Define endpoints handlers
 	serveMux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(rootPath)))))
-	
+
 	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
 	serveMux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
 
