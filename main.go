@@ -26,9 +26,12 @@ func main() {
 	serveMux := http.NewServeMux()
 	// Define endpoints handlers
 	serveMux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(rootPath)))))
-	serveMux.HandleFunc("GET /healthz", handlerReadiness)
-	serveMux.HandleFunc("GET /metrics", apiCfg.handlerMetrics)
-	serveMux.HandleFunc("POST /reset", apiCfg.handlerResetHits)
+	
+	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
+	serveMux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
+
+	serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
+	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetHits)
 
 	// Define server struct
 	serverStruct := &http.Server{
