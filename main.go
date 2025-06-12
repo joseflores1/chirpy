@@ -14,27 +14,37 @@ import (
 
 type apiConfig struct {
 	fileServerHits atomic.Int32
-	queries        *database.Queries
+	db             *database.Queries
+	platform string
 }
 
 func main() {
-
-	godotenv.Load()
-	dbURL := os.Getenv("DB_URL")
-	db, errOpen := sql.Open("postgres", dbURL)
-	if errOpen != nil {
-		log.Fatal("Couldn't open connection to database: ", errOpen)
-	}
-	dbQueries := database.New(db)
 
 	// Define consts
 	const rootPath = "."
 	const port = "8080"
 
+	godotenv.Load()
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL must be set")
+	}
+	dbConn, errOpen := sql.Open("postgres", dbURL)
+	if errOpen != nil {
+		log.Fatal("Couldn't open connection to database: ", errOpen)
+	}
+	dbQueries := database.New(dbConn)
+
+	platformStr := os.Getenv("PLATFORM")
+	if platformStr == "" {
+		log.Fatal("PLATFORM must be set")
+	}
+
 	// Define apiConfig struct
 	apiCfg := &apiConfig{
 		fileServerHits: atomic.Int32{},
-		queries:        dbQueries,
+		db:             dbQueries,
+		platform: platformStr,
 	}
 
 	// Define mux
@@ -45,8 +55,10 @@ func main() {
 	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
 	serveMux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
 
+	serveMux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
+
 	serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
-	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetHits)
+	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetUsers)
 
 	// Define server struct
 	serverStruct := &http.Server{
