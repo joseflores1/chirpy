@@ -34,16 +34,15 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, http.StatusInternalServerError, "couldn't create database user", errCreateUser)
 		return
 	}
-
 	type response struct {
 		User
 	}
 	respondWithJSON(w, http.StatusCreated, response{
 		User: User{
-			ID: user.ID,
+			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
-			Email: user.Email,
+			Email:     user.Email,
 		},
-	}) 
+	})
 }
