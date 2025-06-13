@@ -31,7 +31,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 
 	user, errCreateUser := cfg.db.CreateUser(r.Context(), params.Email)
 	if errCreateUser != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't create database user", errCreateUser)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", errCreateUser)
 		return
 	}
 
