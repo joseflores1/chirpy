@@ -25,15 +25,16 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	params := parameters{}
 	errDecode := decoder.Decode(&params)
 	if errDecode != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't decode request body", errDecode)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode request body", errDecode)
 		return
 	}
 
 	user, errCreateUser := cfg.db.CreateUser(r.Context(), params.Email)
 	if errCreateUser != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't create database user", errCreateUser)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create database user", errCreateUser)
 		return
 	}
+
 	type response struct {
 		User
 	}
