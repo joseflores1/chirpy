@@ -52,15 +52,17 @@ func main() {
 	// Define endpoints handlers
 	serveMux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(rootPath)))))
 
+	serveMux.HandleFunc("GET /api/chirps", apiCfg.handlerGetAllChirps)
+	serveMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
+	serveMux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpCreation)
+
 	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
+
+	serveMux.HandleFunc("POST /api/login", apiCfg.handlerUserLogin)
 
 	serveMux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
 
-	serveMux.HandleFunc("GET /api/chirps", apiCfg.handlerGetAllChirps)
-	serveMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
-	serveMux.HandleFunc("POST /api/chirps", apiCfg.handleChirpCreation)
-	
-	serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
+		serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetUsers)
 
 	// Define server struct

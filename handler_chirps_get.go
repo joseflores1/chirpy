@@ -33,7 +33,7 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 
 	chirpID, errParse := uuid.Parse(r.PathValue("chirpID"))
 	if errParse != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't parse chirp's ID", errParse)
+		respondWithError(w, http.StatusBadRequest, "Invalid chirp's id", errParse)
 		return
 	}
 
@@ -43,7 +43,7 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusNotFound, "Chirp doesn't exist", errGetChirp)
 			return
 		} else {
-			respondWithError(w, http.StatusInternalServerError, "Couldn't parse chirp's ID", errGetChirp)
+			respondWithError(w, http.StatusInternalServerError, "Couldn't get chirp", errGetChirp)
 			return
 		}
 	}
