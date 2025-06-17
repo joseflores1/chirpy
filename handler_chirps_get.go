@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request)  {
+func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
 
 	dbChirps, errGetChirps := cfg.db.GetChirps(r.Context())
 	if errGetChirps != nil {
@@ -18,11 +18,11 @@ func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request
 	chirps := make([]Chirp, len(dbChirps))
 	for i, dbChirp := range dbChirps {
 		chirps[i] = Chirp{
-			ID: dbChirp.ID,
+			ID:        dbChirp.ID,
 			CreatedAt: dbChirp.CreatedAt,
 			UpdatedAt: dbChirp.UpdatedAt,
-			Body: dbChirp.Body,
-			User_ID: dbChirp.UserID,
+			Body:      dbChirp.Body,
+			User_ID:   dbChirp.UserID,
 		}
 	}
 
@@ -49,10 +49,10 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, Chirp{
-		ID: chirp.ID,
+		ID:        chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,
-		Body: chirp.Body,
-		User_ID: chirp.UserID,
+		Body:      chirp.Body,
+		User_ID:   chirp.UserID,
 	})
 }

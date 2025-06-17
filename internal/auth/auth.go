@@ -3,6 +3,8 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,6 +17,8 @@ type TokenType string
 const (
 	TokenTypeAccess TokenType = "chirpy-access"
 )
+
+var ErrNoAuthHeaderIncluded = errors.New("no auth header included in request")
 
 func HashPassword(password string) (string, error) {
 
@@ -72,4 +76,18 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	return parsedID, nil
+}
+
+func GeatBearerToken(headers http.Header) (string, error) {
+	authString := headers.Get("Authorization")
+	if authString == "" {
+		return "", ErrNoAuthHeaderIncluded 
+	}
+
+	tokenString := strings.TrimSpace(strings.TrimPrefix(authString, "Bearer"))
+	if tokenString == "" {
+		return "", errors.New("malformed authorization header")
+	}
+
+	return tokenString, nil
 }

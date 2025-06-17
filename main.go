@@ -16,6 +16,7 @@ type apiConfig struct {
 	fileServerHits atomic.Int32
 	db             *database.Queries
 	platform       string
+	secretJWTKey   string
 }
 
 func main() {
@@ -40,11 +41,17 @@ func main() {
 		log.Fatal("PLATFORM must be set")
 	}
 
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		log.Fatal("SECRET_KEY must be set")
+	}
+
 	// Define apiConfig struct
 	apiCfg := &apiConfig{
 		fileServerHits: atomic.Int32{},
 		db:             dbQueries,
 		platform:       platformStr,
+		secretJWTKey:   secretKey,
 	}
 
 	// Define mux
@@ -62,7 +69,7 @@ func main() {
 
 	serveMux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
 
-		serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
+	serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetUsers)
 
 	// Define server struct

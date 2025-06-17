@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joseflores1/chirpy/internal/auth"
 	"github.com/joseflores1/chirpy/internal/database"
 )
 
@@ -15,15 +16,26 @@ type Chirp struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Body     string    `json:"body"`
-	User_ID uuid.UUID `json:"user_id"`
+	Body      string    `json:"body"`
+	User_ID   uuid.UUID `json:"user_id"`
 }
 
 func (cfg *apiConfig) handlerChirpCreation(w http.ResponseWriter, r *http.Request) {
 
+	bearerToken, errGetToken := auth.GeatBearerToken(r.Header)
+	if errGetToken != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't find JWT", errGetToken)
+		return
+	}
+
+	userID, errValidateJWT := auth.ValidateJWT(bearerToken, cfg.secretJWTKey)
+	if errValidateJWT != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't validate JWT", errValidateJWT)
+		return
+	}
+
 	type parameters struct {
-		Body string `json:"body"`
-		User_ID uuid.UUID `json:"user_id"`
+		Body    string    `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -41,8 +53,8 @@ func (cfg *apiConfig) handlerChirpCreation(w http.ResponseWriter, r *http.Reques
 	}
 
 	chirp, errCreateChirp := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
-		Body: cleanBody,
-		UserID: params.User_ID,
+		Body:   cleanBody,
+		UserID: userID,
 	})
 	if errCreateChirp != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp", errCreateChirp)
@@ -55,11 +67,11 @@ func (cfg *apiConfig) handlerChirpCreation(w http.ResponseWriter, r *http.Reques
 
 	respondWithJSON(w, http.StatusCreated, response{
 		Chirp: Chirp{
-			ID: chirp.ID,
+			ID:        chirp.ID,
 			CreatedAt: chirp.CreatedAt,
 			UpdatedAt: chirp.UpdatedAt,
-			Body: chirp.Body,
-			User_ID: chirp.UserID,
+			Body:      chirp.Body,
+			User_ID:   chirp.UserID,
 		},
 	})
 }
