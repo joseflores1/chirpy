@@ -1,8 +1,8 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 )
@@ -11,7 +11,7 @@ func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request
 
 	dbChirps, errGetChirps := cfg.db.GetChirps(r.Context())
 	if errGetChirps != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't get all chirps in the database", errGetChirps)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps from database", errGetChirps)
 		return
 	}
 
@@ -39,7 +39,7 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 
 	chirp, errGetChirp := cfg.db.GetChirp(r.Context(), chirpID)
 	if errGetChirp != nil {
-		if strings.Contains(errGetChirp.Error(), "no rows in result set") {
+		if errGetChirp == sql.ErrNoRows {
 			respondWithError(w, http.StatusNotFound, "Chirp doesn't exist", errGetChirp)
 			return
 		} else {

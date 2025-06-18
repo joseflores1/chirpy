@@ -66,6 +66,8 @@ func main() {
 	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
 
 	serveMux.HandleFunc("POST /api/login", apiCfg.handlerUserLogin)
+	serveMux.HandleFunc("POST /api/refresh", apiCfg.handlerRefreshToken)
+	serveMux.HandleFunc("POST /api/revoke", apiCfg.handlerRevokeToken)
 
 	serveMux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
 

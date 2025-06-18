@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -59,7 +61,7 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 
 	id, errGetID := jwtToken.Claims.GetSubject()
 	if errGetID != nil {
-		return uuid.Nil, fmt.Errorf("coudln't get subject id: %w", errGetID)
+		return uuid.Nil, fmt.Errorf("couldn't get subject's id: %w", errGetID)
 	}
 
 	issuer, errIssuer := jwtToken.Claims.GetIssuer()
@@ -90,4 +92,11 @@ func GeatBearerToken(headers http.Header) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func MakeRefreshToken() (string, error) {
+	key := make([]byte, 32)
+	rand.Read(key)
+	encodedKey := hex.EncodeToString(key)
+	return encodedKey, nil
 }
