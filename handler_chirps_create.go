@@ -35,7 +35,7 @@ func (cfg *apiConfig) handlerChirpCreation(w http.ResponseWriter, r *http.Reques
 	}
 
 	type parameters struct {
-		Body    string    `json:"body"`
+		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)

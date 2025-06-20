@@ -3,26 +3,28 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/joseflores1/chirpy/internal/auth"
 	"github.com/joseflores1/chirpy/internal/database"
 )
 
-type User struct {
-	ID          uuid.UUID `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Email       string    `json:"email"`
-	IsChirpyRed bool      `json:"is_chirpy_red"`
-}
+func (cfg *apiConfig) handlerUpdateCredentials(w http.ResponseWriter, r *http.Request) {
 
-func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request) {
+	bearerToken, errGetToken := auth.GeatBearerToken(r.Header)
+	if errGetToken != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't get JWT from header", errGetToken)
+		return
+	}
+
+	userID, errValidateJWT := auth.ValidateJWT(bearerToken, cfg.secretJWTKey)
+	if errValidateJWT != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't validate JWT", errValidateJWT)
+		return
+	}
 
 	type parameters struct {
-		Password string `json:"password"`
 		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -39,19 +41,21 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, errCreateUser := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
-		Email:          params.Email,
+	user, errUpdate := cfg.db.UpdateCredentials(r.Context(), database.UpdateCredentialsParams{
 		HashedPassword: hashedPwd,
+		Email:          params.Email,
+		ID:             userID,
 	})
-	if errCreateUser != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", errCreateUser)
+	if errUpdate != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't update credentials", errUpdate)
 		return
 	}
 
 	type response struct {
 		User
 	}
-	respondWithJSON(w, http.StatusCreated, response{
+
+	respondWithJSON(w, http.StatusOK, response{
 		User: User{
 			ID:          user.ID,
 			CreatedAt:   user.CreatedAt,

@@ -61,6 +61,7 @@ func main() {
 
 	serveMux.HandleFunc("GET /api/chirps", apiCfg.handlerGetAllChirps)
 	serveMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
+	serveMux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.handlerDeleteChirp)
 	serveMux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpCreation)
 
 	serveMux.HandleFunc("GET /api/healthz", handlerReadiness)
@@ -70,6 +71,9 @@ func main() {
 	serveMux.HandleFunc("POST /api/revoke", apiCfg.handlerRevokeToken)
 
 	serveMux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
+	serveMux.HandleFunc("PUT /api/users", apiCfg.handlerUpdateCredentials)
+
+	serveMux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerPolkaWebhook)
 
 	serveMux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	serveMux.HandleFunc("POST /admin/reset", apiCfg.handlerResetUsers)

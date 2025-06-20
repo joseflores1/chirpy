@@ -83,7 +83,7 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 func GeatBearerToken(headers http.Header) (string, error) {
 	authString := headers.Get("Authorization")
 	if authString == "" {
-		return "", ErrNoAuthHeaderIncluded 
+		return "", ErrNoAuthHeaderIncluded
 	}
 
 	tokenString := strings.TrimSpace(strings.TrimPrefix(authString, "Bearer"))

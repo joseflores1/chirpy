@@ -12,3 +12,15 @@ RETURNING *;
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE email = $1;
+
+-- name: UpdateCredentials :one
+UPDATE users
+SET hashed_password = $1, email = $2, updated_at = NOW()
+WHERE id = $3
+RETURNING *;
+
+-- name: UpgradeMembership :one
+UPDATE users
+SET is_chirpy_red = TRUE, updated_at = NOW()
+wHERE id = $1
+RETURNING *;

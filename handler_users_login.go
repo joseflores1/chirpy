@@ -16,7 +16,6 @@ func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 		Email    string `json:"email"`
 	}
 
-
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	errDecode := decoder.Decode(&params)
@@ -46,8 +45,8 @@ func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	refreshToken, _ := auth.MakeRefreshToken()
 	_, errRefreshToken := cfg.db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
-		Token: refreshToken,
-		UserID: user.ID,
+		Token:     refreshToken,
+		UserID:    user.ID,
 		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
 	})
 	if errRefreshToken != nil {
@@ -57,18 +56,19 @@ func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	type response struct {
 		User
-		Token string `json:"token"`
+		Token        string `json:"token"`
 		RefreshToken string `json:"refresh_token"`
 	}
 
 	respondWithJSON(w, http.StatusOK, response{
 		User: User{
-			ID:        user.ID,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-			Email:     user.Email,
+			ID:          user.ID,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
+			Email:       user.Email,
+			IsChirpyRed: user.IsChirpyRed,
 		},
-		Token: jwtToken,
+		Token:        jwtToken,
 		RefreshToken: refreshToken,
 	})
 }
