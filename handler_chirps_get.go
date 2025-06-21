@@ -3,13 +3,29 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
+	"github.com/joseflores1/chirpy/internal/database"
 )
 
 func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
 
-	dbChirps, errGetChirps := cfg.db.GetChirps(r.Context())
+	var dbChirps []database.Chirp
+	var errGetChirps error
+
+	authorID := r.URL.Query().Get("author_id")
+	if authorID != "" {
+		parseID, errParse := uuid.Parse(authorID)
+		if errParse != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid author_id format", errParse)
+			return
+		}
+		dbChirps, errGetChirps = cfg.db.GetChirpsByAuthor(r.Context(), parseID)
+	} else {
+		dbChirps, errGetChirps = cfg.db.GetChirps(r.Context())
+	}
+
 	if errGetChirps != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps from database", errGetChirps)
 		return
@@ -24,6 +40,11 @@ func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request
 			Body:      dbChirp.Body,
 			User_ID:   dbChirp.UserID,
 		}
+	}
+
+	sortParam := r.URL.Query().Get("sort")
+	if sortParam == "desc" {
+		sort.Slice(chirps, func(i, j int) bool {return chirps[i].CreatedAt.After(chirps[j].CreatedAt)})
 	}
 
 	respondWithJSON(w, http.StatusOK, chirps)

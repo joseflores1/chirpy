@@ -3,12 +3,24 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/joseflores1/chirpy/internal/auth"
 )
 
 func (cfg *apiConfig) handlerPolkaWebhook(w http.ResponseWriter, r *http.Request) {
+
+	apiKey, errApiKey := auth.GetAPIKey(r.Header)
+	if errApiKey != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't get API key from header", errApiKey)
+		return
+	}
+	if apiKey != cfg.polkaKey {
+		respondWithError(w, http.StatusUnauthorized, "Invalid API key", errors.New("invalid api key"))
+		return
+	}
 
 	type parameters struct {
 		Event string `json:"event"`

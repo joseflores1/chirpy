@@ -17,6 +17,7 @@ type apiConfig struct {
 	db             *database.Queries
 	platform       string
 	secretJWTKey   string
+	polkaKey       string
 }
 
 func main() {
@@ -46,12 +47,18 @@ func main() {
 		log.Fatal("SECRET_KEY must be set")
 	}
 
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatal("POLKA_KEY must be set")
+	}
+
 	// Define apiConfig struct
 	apiCfg := &apiConfig{
 		fileServerHits: atomic.Int32{},
 		db:             dbQueries,
 		platform:       platformStr,
 		secretJWTKey:   secretKey,
+		polkaKey:       polkaKey,
 	}
 
 	// Define mux
